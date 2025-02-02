@@ -3,6 +3,7 @@ package com.groommoa.aether_back_spring.global.auth.dto;
 import com.groommoa.aether_back_spring.domain.user.model.Role;
 import com.groommoa.aether_back_spring.domain.user.model.User;
 import com.groommoa.aether_back_spring.global.auth.exception.AuthException;
+import com.groommoa.aether_back_spring.global.common.utils.KeyGenerator;
 import lombok.Builder;
 
 import java.util.Map;
@@ -36,6 +37,7 @@ public record OAuth2UserInfo(
                 .name(name)
                 .email(email)
                 .profile(profile)
+                .userKey(KeyGenerator.generateKey())
                 .role(Role.USER)
                 .build();
     }

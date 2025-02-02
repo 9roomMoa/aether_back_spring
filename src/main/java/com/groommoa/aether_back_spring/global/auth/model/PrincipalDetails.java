@@ -3,6 +3,7 @@ package com.groommoa.aether_back_spring.global.auth.model;
 import com.groommoa.aether_back_spring.domain.user.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
@@ -13,7 +14,7 @@ public record PrincipalDetails(
         User user,
         Map<String, Object> attributes,
         String attributeKey
-) implements OAuth2User {
+) implements OAuth2User, UserDetails {
 
     @Override
     public String getName() {
@@ -30,5 +31,15 @@ public record PrincipalDetails(
         return Collections.singletonList(
                 new SimpleGrantedAuthority(user.getRole().getKey())
         );
+    }
+
+    @Override
+    public String getPassword() {
+        return null;
+    }
+
+    @Override
+    public String getUsername() {
+        return user.getUserKey();
     }
 }

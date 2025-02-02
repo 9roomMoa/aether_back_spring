@@ -25,15 +25,19 @@ public class User {
     @Column(nullable = false)
     private String profile;
 
+    @Column(nullable = false, unique = true)
+    private String userKey;
+
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
     @Builder
-    public User(String name, String email, String profile, Role role) {
+    public User(String name, String email, String profile, String userKey, Role role) {
         this.name = name;
         this.email = email;
         this.profile = profile;
+        this.userKey = userKey;
         this.role = role;
     }
 
