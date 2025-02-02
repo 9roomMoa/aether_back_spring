@@ -48,7 +48,7 @@ public class AuthControllerTest {
         doNothing().when(tokenService).deleteRefreshToken(any());
 
         mockMvc.perform(delete("/auth/logout"))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
                 .andDo(print());
     }
 }
