@@ -30,4 +30,13 @@ public class AuthController {
                 HttpStatus.OK, "소셜 로그인에 성공했습니다.", result);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/auth/logout")
+    public ResponseEntity<CommonResponse> logout(@AuthenticationPrincipal UserDetails userDetails) {
+        tokenService.deleteRefreshToken(userDetails.getUsername());
+
+        CommonResponse response = new CommonResponse(
+                HttpStatus.OK, "로그아웃에 성공했습니다.", null);
+        return ResponseEntity.ok(response);
+    }
 }
