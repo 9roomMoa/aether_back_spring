@@ -52,6 +52,7 @@ public class SecurityConfig {
                         c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(
+                                new AntPathRequestMatcher("/h2-console/**"),
                                 new AntPathRequestMatcher("/"),
                                 new AntPathRequestMatcher("/auth/success")
                         ).permitAll()
