@@ -1,7 +1,7 @@
 package com.groommoa.aether_back_spring.global.auth.service;
 
-import com.groommoa.aether_back_spring.domain.user.model.User;
-import com.groommoa.aether_back_spring.domain.user.model.UserRepository;
+import com.groommoa.aether_back_spring.domain.user.entity.User;
+import com.groommoa.aether_back_spring.domain.user.repository.UserRepository;
 import com.groommoa.aether_back_spring.global.auth.dto.OAuth2UserInfo;
 import com.groommoa.aether_back_spring.global.auth.model.PrincipalDetails;
 import jakarta.transaction.Transactional;

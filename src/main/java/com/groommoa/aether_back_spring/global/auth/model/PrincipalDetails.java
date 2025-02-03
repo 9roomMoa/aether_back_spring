@@ -1,6 +1,6 @@
 package com.groommoa.aether_back_spring.global.auth.model;
 
-import com.groommoa.aether_back_spring.domain.user.model.User;
+import com.groommoa.aether_back_spring.domain.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
