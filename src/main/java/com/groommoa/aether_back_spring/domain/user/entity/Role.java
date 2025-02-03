@@ -1,4 +1,4 @@
-package com.groommoa.aether_back_spring.domain.user.model;
+package com.groommoa.aether_back_spring.domain.user.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Role {
-    USER("ROLE_USER"),
+    MEMBER("ROLE_MEMBER"),
     ADMIN("ROLE_ADMIN");
 
     private final String key;

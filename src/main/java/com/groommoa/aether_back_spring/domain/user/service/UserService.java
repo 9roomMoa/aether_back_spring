@@ -1,9 +1,8 @@
 package com.groommoa.aether_back_spring.domain.user.service;
 
 import com.groommoa.aether_back_spring.domain.user.exception.UserException;
-import com.groommoa.aether_back_spring.domain.user.model.User;
-import com.groommoa.aether_back_spring.domain.user.model.UserRepository;
-import com.groommoa.aether_back_spring.global.common.exception.ErrorCode;
+import com.groommoa.aether_back_spring.domain.user.entity.User;
+import com.groommoa.aether_back_spring.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
