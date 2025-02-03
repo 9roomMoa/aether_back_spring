@@ -195,3 +195,6 @@ gradle-app.setting
 
 # 스프링 oauth 보안 설정 제외
 application-oauth.properties
+
+# DB 관련 설정 제외
+application-cloud.properties
