@@ -20,6 +20,11 @@ public class UserController {
 
     private final UserService userService;
 
+    /**
+     * 현재 인증된 사용자의 정보 조회
+     * @param userDetails 인증된 사용자의 정보를 포함하는 객체 (Spring Security 제공)
+     * @return 사용자 정보
+     */
     @GetMapping
     public ResponseEntity<CommonResponse> getUserInfo(
             @AuthenticationPrincipal UserDetails userDetails){
