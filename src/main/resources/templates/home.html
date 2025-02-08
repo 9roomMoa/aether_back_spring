@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <!-- 로그인 기능 영역 -->
+    <div th:unless="${userName}">
+        <a th:href="@{/oauth2/authorization/google}" class="btn btn-success active" role="button">Google </a>
+    </div>
+    <!-- 로그아웃 기능 영역 -->
+    <div th:if="${userName}">
+        Logged in as : <span id="user" th:text="${userName}"></span>
+        <a th:href="@{/logout}" class="btn btn-info active" role="button">Logout</a>
+    </div>
+</body>
+</html>
