@@ -57,6 +57,11 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * accessToken을 재발급함
+     * @param response HTTP 응답 객체
+     * @return 재발급된 accessToken을 포함한 응답
+     */
     @GetMapping("/reissue")
     public ResponseEntity<CommonResponse> reissueAccessToken(HttpServletResponse response) {
         String newAccessToken = response.getHeader(AUTHORIZATION);
@@ -76,6 +81,11 @@ public class AuthController {
                 HttpStatus.OK, "access token 재발급에 성공했습니다.", result));
     }
 
+    /**
+     * 테스트용 엔드포인트
+     *
+     * @return 인증 테스트 성공 응답을 반환합니다.
+     */
     @GetMapping("/test")
     public ResponseEntity<CommonResponse> test() {
         return ResponseEntity.ok(new CommonResponse(
