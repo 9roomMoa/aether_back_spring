@@ -5,9 +5,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "testUsers")
+import java.time.Instant;
+import java.util.List;
+
+@Document(collection = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
@@ -19,19 +24,30 @@ public class User {
 
     private String email;
 
-    private String profile;
+    private boolean isSocial;
 
-    private String userKey;
+    private List<SocialUser> socialAccounts;
 
     private Role role;
 
+    private Rank rank;
+
+    @CreatedDate
+    private Instant createdAt;
+
+    @LastModifiedDate
+    private Instant updatedAt;
+
     @Builder
-    public User(String name, String email, String profile, String userKey, Role role) {
+    public User(String name, String email, boolean isSocial, List<SocialUser> socialAccounts,
+                Role role, Rank rank) {
         this.name = name;
         this.email = email;
-        this.profile = profile;
-        this.userKey = userKey;
+        this.isSocial = isSocial;
+        this.socialAccounts = socialAccounts;
         this.role = role;
+        this.rank = rank;
+
     }
 
 }

@@ -5,9 +5,10 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Role {
-    Member("ROLE_MEMBER"),
-    Admin("ROLE_ADMIN");
+public enum Provider {
+    Google("PROVIDER_GOOGLE"),
+    Kakao("PROVIDER_KAKAO"),
+    Naver("PROVIDER_NAVER");
 
     private final String key;
 }
