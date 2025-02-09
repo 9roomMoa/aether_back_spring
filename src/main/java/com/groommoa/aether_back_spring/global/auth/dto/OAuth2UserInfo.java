@@ -1,11 +1,12 @@
 package com.groommoa.aether_back_spring.global.auth.dto;
 
-import com.groommoa.aether_back_spring.domain.user.entity.Role;
-import com.groommoa.aether_back_spring.domain.user.entity.User;
+import com.groommoa.aether_back_spring.domain.user.entity.*;
 import com.groommoa.aether_back_spring.global.auth.exception.AuthException;
 import com.groommoa.aether_back_spring.global.common.utils.KeyGenerator;
 import lombok.Builder;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 import static com.groommoa.aether_back_spring.global.common.exception.ErrorCode.ILLEGAL_REGISTRATION_ID;
@@ -15,6 +16,8 @@ import static com.groommoa.aether_back_spring.global.common.exception.ErrorCode.
  */
 @Builder
 public record OAuth2UserInfo(
+        Provider provider,
+        String socialId,
         String name,    // 사용자 이름
         String email,   // 사용자 이메일
         String profile  // 프로필 이미지 URL
@@ -43,6 +46,8 @@ public record OAuth2UserInfo(
      */
     private static OAuth2UserInfo ofGoogle(Map<String, Object> attributes) {
         return OAuth2UserInfo.builder()
+                .provider(Provider.Google)
+                .socialId((String)attributes.get("sub"))
                 .name((String) attributes.get("name"))
                 .email((String) attributes.get("email"))
                 .profile((String) attributes.get("picture"))
@@ -55,12 +60,15 @@ public record OAuth2UserInfo(
      * @return User 엔터티 객체
      */
     public User toEntity(){
+        Instant now = Instant.now();
+        SocialUser socialUser = new SocialUser(provider, socialId, email);
         return User.builder()
                 .name(name)
                 .email(email)
-                .profile(profile)
-                .userKey(KeyGenerator.generateKey())
-                .role(Role.MEMBER)
+                .isSocial(true)
+                .socialAccounts(List.of(socialUser))
+                .role(Role.Member)
+                .rank(Rank.Intern)
                 .build();
     }
 }

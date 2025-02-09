@@ -63,13 +63,8 @@ public record PrincipalDetails(
         return null;
     }
 
-    /**
-     * 사용자의 고유 식별값(userKey) 반환
-     *
-     * @return 사용자 고유 키 (UUID 로 생성된 고유값)
-     */
     @Override
     public String getUsername() {
-        return user.getUserKey();
+        return user.getEmail();
     }
 }
