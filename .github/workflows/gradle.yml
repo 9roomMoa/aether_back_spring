@@ -30,6 +30,7 @@ jobs:
           echo "spring.security.oauth2.client.registration.google.client-id=${{ secrets.GOOGLE_CLIENT_ID }}" >> ./src/main/resources/application-oauth.properties
           echo "spring.security.oauth2.client.registration.google.client-secret=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> ./src/main/resources/application-oauth.properties
           echo "spring.security.oauth2.client.registration.google.scope=${{ secrets.GOOGLE_SCOPE }}" >> ./src/main/resources/application-oauth.properties
+          echo "spring.security.oauth2.client.registration.google.redirect-uri=${{ secrets.GOOGLE_REDIRECT_URI }}" >> ./src/main/resources/application-oauth.properties
 
       - name: Create application-cloud properties
         run: |
