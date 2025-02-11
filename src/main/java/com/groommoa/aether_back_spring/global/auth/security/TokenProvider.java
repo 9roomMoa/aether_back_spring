@@ -1,7 +1,9 @@
 package com.groommoa.aether_back_spring.global.auth.security;
 
 import com.groommoa.aether_back_spring.domain.redis.entity.Token;
+import com.groommoa.aether_back_spring.domain.user.entity.Member;
 import com.groommoa.aether_back_spring.global.auth.exception.TokenException;
+import com.groommoa.aether_back_spring.global.auth.model.PrincipalDetails;
 import com.groommoa.aether_back_spring.global.auth.service.TokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -11,21 +13,16 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static com.groommoa.aether_back_spring.global.common.exception.ErrorCode.INVALID_JWT_SIGNATURE;
 import static com.groommoa.aether_back_spring.global.common.exception.ErrorCode.INVALID_TOKEN;
@@ -42,6 +39,8 @@ public class TokenProvider {
     private SecretKey secretKey;
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30L;   // 30분
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60L * 24 * 7; // 7일
+    private static final String KEY_NAME = "name";
+    private static final String KEY_EMAIL = "email";
     private static final String KEY_ROLE = "role";
     private final TokenService tokenService;
 
@@ -85,17 +84,28 @@ public class TokenProvider {
         Date now = new Date();
         Date expiredDate = new Date(now.getTime() + expireTime);
 
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining());
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        Member member = principalDetails.member();
 
         return Jwts.builder()
-                .subject(authentication.getName())      // 사용자 식별 정보
-                .claim(KEY_ROLE, authorities)           // 권한 정보 추가
+                .header().type("JWT")                   // 헤더에 타입 지정
+                .and()
+                .subject(member.getId())                // 멤버 id
+                .claims(memberToMap(member))            // claim 정보
                 .issuedAt(now)                          // 발급 시간
                 .expiration(expiredDate)                // 만료 시간
                 .signWith(secretKey, Jwts.SIG.HS512)    // 서명 (HMAC SHA512)
                 .compact();
+    }
+
+    private Map<String, Object> memberToMap(Member member){
+        Map<String, Object> memberMap = new HashMap<>();
+
+        memberMap.put(KEY_NAME, member.getName());
+        memberMap.put(KEY_EMAIL, member.getEmail());
+        memberMap.put(KEY_ROLE, member.getRole());
+
+        return memberMap;
     }
 
     /**
@@ -110,6 +120,7 @@ public class TokenProvider {
 
         // Spring Security의 User 객체 생성
         User principal = new User(claims.getSubject(), "", authorities);
+
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 

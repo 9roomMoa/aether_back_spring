@@ -1,6 +1,6 @@
 package com.groommoa.aether_back_spring.global.auth.model;
 
-import com.groommoa.aether_back_spring.domain.user.entity.User;
+import com.groommoa.aether_back_spring.domain.user.entity.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +16,7 @@ import java.util.Map;
  * OAuth2 로그인 및 일반 로그인(UserDetails)을 모두 지원
  */
 public record PrincipalDetails(
-        User user,                      // 인증된 사용자 객체
+        Member member,                      // 인증된 사용자 객체
         Map<String, Object> attributes, // OAuth2 제공자로부터 받은 사용자 정보
         String attributeKey             // OAuth2 제공자의 사용자 식별 키
 ) implements OAuth2User, UserDetails {
@@ -49,7 +49,7 @@ public record PrincipalDetails(
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(
-                new SimpleGrantedAuthority(user.getRole().getKey())
+                new SimpleGrantedAuthority(member.getRole().getKey())
         );
     }
 
@@ -65,6 +65,6 @@ public record PrincipalDetails(
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return member.getEmail();
     }
 }

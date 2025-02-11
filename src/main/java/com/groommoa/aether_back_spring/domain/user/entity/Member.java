@@ -15,7 +15,7 @@ import java.util.List;
 @Document(collection = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class Member {
 
     @Id
     private String id;
@@ -39,8 +39,8 @@ public class User {
     private Instant updatedAt;
 
     @Builder
-    public User(String name, String email, boolean isSocial, List<SocialUser> socialAccounts,
-                Role role, Rank rank) {
+    public Member(String name, String email, boolean isSocial, List<SocialUser> socialAccounts,
+                  Role role, Rank rank) {
         this.name = name;
         this.email = email;
         this.isSocial = isSocial;
