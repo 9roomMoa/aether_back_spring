@@ -2,7 +2,6 @@ package com.groommoa.aether_back_spring.global.auth.dto;
 
 import com.groommoa.aether_back_spring.domain.user.entity.*;
 import com.groommoa.aether_back_spring.global.auth.exception.AuthException;
-import com.groommoa.aether_back_spring.global.common.utils.KeyGenerator;
 import lombok.Builder;
 
 import java.time.Instant;
@@ -59,10 +58,9 @@ public record OAuth2UserInfo(
      *
      * @return User 엔터티 객체
      */
-    public User toEntity(){
-        Instant now = Instant.now();
+    public Member toEntity(){
         SocialUser socialUser = new SocialUser(provider, socialId, email);
-        return User.builder()
+        return Member.builder()
                 .name(name)
                 .email(email)
                 .isSocial(true)

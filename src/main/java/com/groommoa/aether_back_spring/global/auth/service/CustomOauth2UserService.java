@@ -1,6 +1,6 @@
 package com.groommoa.aether_back_spring.global.auth.service;
 
-import com.groommoa.aether_back_spring.domain.user.entity.User;
+import com.groommoa.aether_back_spring.domain.user.entity.Member;
 import com.groommoa.aether_back_spring.domain.user.repository.UserRepository;
 import com.groommoa.aether_back_spring.global.auth.dto.OAuth2UserInfo;
 import com.groommoa.aether_back_spring.global.auth.model.PrincipalDetails;
@@ -49,7 +49,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfo.of(registrationId, attributes);
 
         // 기존 사용자가 있으면 가져오고, 없으면 저장
-        User user = getOrSave(oAuth2UserInfo);
+        Member user = getOrSave(oAuth2UserInfo);
 
         // 인증된 사용자 정보를 PrincipalDetails 객체로 반환
         return new PrincipalDetails(user, attributes, userNameAttributeName);
@@ -61,8 +61,8 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
      * @param oAuth2UserInfo OAuth2UserInfo DTO (OAuth2 제공자로부터 받은 사용자 정보)
      * @return 저장된 User 엔티티 객체
      */
-    private User getOrSave(OAuth2UserInfo oAuth2UserInfo) {
-        User user = userRepository.findByEmail(oAuth2UserInfo.email())
+    private Member getOrSave(OAuth2UserInfo oAuth2UserInfo) {
+        Member user = userRepository.findByEmail(oAuth2UserInfo.email())
                 .orElseGet(oAuth2UserInfo::toEntity);
         return userRepository.save(user);
     }
