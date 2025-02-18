@@ -26,6 +26,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Component
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
+    private final String reissueUri = "/auth/reissue";
     private final TokenProvider tokenProvider;
 
     /**
@@ -49,8 +50,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         if (tokenProvider.validateToken(accessToken)) {
             // 토큰이 유효한 경우 인증 설정
             setAuthentication(accessToken);
-        } else {
-            // 토큰이 만료된 경우 새로운 AccessToken 재발급
+        } else if (request.getRequestURI().equals(reissueUri)) {
+            // 토큰이 만료된 경우 reissue 요청이 들어온 경우에 새로운 AccessToken 재발급
             String reissueAccessToken = tokenProvider.reissueAccessToken(accessToken);
 
             if (StringUtils.hasText(reissueAccessToken)) {
