@@ -129,6 +129,11 @@ public class TokenProvider {
                 .compact();
     }
 
+    /**
+     * Member 객체의 정보를 Map으로 변환
+     * @param member Member 객체
+     * @return Member 정보를 담은 Map
+     */
     private Map<String, Object> memberToMap(Member member){
         Map<String, Object> memberMap = new HashMap<>();
 
