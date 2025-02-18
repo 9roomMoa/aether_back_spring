@@ -1,16 +1,14 @@
 package com.groommoa.aether_back_spring.global.auth.controller;
 
-import com.groommoa.aether_back_spring.global.auth.model.PrincipalDetails;
 import com.groommoa.aether_back_spring.global.auth.service.TokenService;
 import com.groommoa.aether_back_spring.global.common.constants.HttpStatus;
 import com.groommoa.aether_back_spring.global.common.constants.TokenKey;
 import com.groommoa.aether_back_spring.global.common.response.CommonResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,14 +42,14 @@ public class AuthController {
 
     /**
      * 로그아웃
-     * @param userDetails 현재 로그인한 사용자의 정보 (Spring Security 제공)
+     * @param claims 현재 로그인한 사용자의 정보 (Spring Security 제공)
      * @return 로그아웃 성공 응답
      */
     @DeleteMapping("/logout")
-    public ResponseEntity<CommonResponse> logout(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<CommonResponse> logout(@AuthenticationPrincipal Claims claims) {
 
         // 사용자 계정과 연관된 refresh token 삭제
-        String userId = userDetails.getUsername();
+        String userId = claims.getSubject();
         tokenService.deleteRefreshToken(userId);
 
         // 로그아웃 성공 응답 객체 생성
