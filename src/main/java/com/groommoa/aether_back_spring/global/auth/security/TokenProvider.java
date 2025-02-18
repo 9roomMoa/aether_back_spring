@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -53,38 +52,47 @@ public class TokenProvider {
     }
 
     /**
-     * AccessToken 생성
+     * AccessToken 최초 생성
      *
-     * @param authentication 인증 객체
+     * @param principalDetails 인증된 유저 정보 객체
      * @return 생성된 AccessToken
      */
-    public String generateAccessToken(Authentication authentication) {
-        return generateToken(authentication, ACCESS_TOKEN_EXPIRE_TIME);
+    public String generateAccessToken(PrincipalDetails principalDetails) {
+        return generateToken(principalDetails, ACCESS_TOKEN_EXPIRE_TIME);
+    }
+
+    /**
+     * AccessToken 재발급
+     *
+     * @param claims 이전 jwt 토큰 claims
+     * @return 생성된 AccessToken
+     */
+    public String generateAccessToken(Claims claims) {
+        return generateToken(claims.getId(), claims, ACCESS_TOKEN_EXPIRE_TIME);
     }
 
     /**
      * RefreshToken을 생성하고 Redis에 저장
      *
-     * @param authentication 인증 객체
+     * @param principalDetails 인증된 유저 정보 객체
      * @param accessToken    발급된 AccessToken
      */
-    public void generateRefreshToken(Authentication authentication, String accessToken) {
-        String refreshToken = generateToken(authentication, REFRESH_TOKEN_EXPIRE_TIME);
-        tokenService.saveOrUpdate(authentication.getName(), refreshToken, accessToken);
+    public void generateRefreshToken(PrincipalDetails principalDetails, String accessToken) {
+        String refreshToken = generateToken(principalDetails, REFRESH_TOKEN_EXPIRE_TIME);
+        tokenService.saveOrUpdate(principalDetails.getUsername(), refreshToken, accessToken);
     }
 
     /**
      * JWT 토큰을 생성하는 내부 메서드
      *
-     * @param authentication 인증 객체
+     * @param principalDetails 인증된 유저 정보 객체
      * @param expireTime     토큰 만료 시간
      * @return 생성된 JWT 토큰
      */
-    private String generateToken(Authentication authentication, long expireTime) {
+    private String generateToken(PrincipalDetails principalDetails, long expireTime) {
         Date now = new Date();
         Date expiredDate = new Date(now.getTime() + expireTime);
 
-        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
         Member member = principalDetails.member();
 
         return Jwts.builder()
@@ -98,6 +106,34 @@ public class TokenProvider {
                 .compact();
     }
 
+    /**
+     * JWT 토큰 재생성
+     *
+     * @param id 사용자 고유 id
+     * @param claims 이전 JWT 토큰 claims
+     * @param expireTime 토큰 만료 시간
+     * @return 생성된 JWT 토큰
+     */
+    private String generateToken(String id, Claims claims, long expireTime) {
+        Date now = new Date();
+        Date expiredDate = new Date(now.getTime() + expireTime);
+
+        return Jwts.builder()
+                .header().type("JWT")                   // 헤더에 타입 지정
+                .and()
+                .subject(id)                // 멤버 id
+                .claims(claims)            // claim 정보
+                .issuedAt(now)                          // 발급 시간
+                .expiration(expiredDate)                // 만료 시간
+                .signWith(secretKey, Jwts.SIG.HS512)    // 서명 (HMAC SHA512)
+                .compact();
+    }
+
+    /**
+     * Member 객체의 정보를 Map으로 변환
+     * @param member Member 객체
+     * @return Member 정보를 담은 Map
+     */
     private Map<String, Object> memberToMap(Member member){
         Map<String, Object> memberMap = new HashMap<>();
 
@@ -118,10 +154,7 @@ public class TokenProvider {
         Claims claims = parseClaims(token);
         List<SimpleGrantedAuthority> authorities = getAuthorities(claims);
 
-        // Spring Security의 User 객체 생성
-        User principal = new User(claims.getSubject(), "", authorities);
-
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        return new UsernamePasswordAuthenticationToken(claims, token, authorities);
     }
 
     /**
@@ -148,7 +181,8 @@ public class TokenProvider {
 
             // RefreshToken이 유효한 경우 새로운 AccessToken 발급
             if (validateToken(refreshToken)){
-                String reissueAccessToken = generateAccessToken(getAuthentication(refreshToken));
+                Claims claims = (Claims) getAuthentication(refreshToken).getPrincipal();
+                String reissueAccessToken = generateAccessToken(claims);
                 tokenService.updateToken(reissueAccessToken, token);
                 return reissueAccessToken;
             }

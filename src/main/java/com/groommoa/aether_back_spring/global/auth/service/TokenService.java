@@ -23,24 +23,24 @@ public class TokenService {
     /**
      * 특정 사용자의 리프레시 토큰을 삭제합니다.
      *
-     * @param userKey 사용자 고유 키
+     * @param id 사용자 고유 id
      */
-    public void deleteRefreshToken(String userKey) {
-        tokenRepository.deleteById(userKey);
+    public void deleteRefreshToken(String id) {
+        tokenRepository.deleteById(id);
     }
 
     /**
      * 리프레시 토큰과 액세스 토큰을 저장하거나 업데이트합니다.
      *
-     * @param userKey      사용자 고유 키
+     * @param id      사용자 id
      * @param refreshToken 새 리프레시 토큰
      * @param accessToken  새로운 액세스 토큰
      */
     @Transactional
-    public void saveOrUpdate(String userKey, String refreshToken, String accessToken) {
+    public void saveOrUpdate(String id, String refreshToken, String accessToken) {
         Token token = tokenRepository.findByAccessToken(accessToken)
                 .map(o -> o.updateRefreshToken(refreshToken))
-                .orElseGet(() -> new Token(userKey, refreshToken, accessToken));
+                .orElseGet(() -> new Token(id, refreshToken, accessToken));
 
         tokenRepository.save(token);
     }
