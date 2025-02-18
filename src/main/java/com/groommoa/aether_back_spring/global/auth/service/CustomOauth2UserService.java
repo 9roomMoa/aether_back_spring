@@ -49,10 +49,10 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfo.of(registrationId, attributes);
 
         // 기존 사용자가 있으면 가져오고, 없으면 저장
-        Member user = getOrSave(oAuth2UserInfo);
+        Member member = getOrSave(oAuth2UserInfo);
 
         // 인증된 사용자 정보를 PrincipalDetails 객체로 반환
-        return new PrincipalDetails(user, attributes, userNameAttributeName);
+        return new PrincipalDetails(member, attributes, userNameAttributeName);
     }
 
     /**
@@ -62,8 +62,8 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
      * @return 저장된 User 엔티티 객체
      */
     private Member getOrSave(OAuth2UserInfo oAuth2UserInfo) {
-        Member user = userRepository.findByEmail(oAuth2UserInfo.email())
+        Member member = userRepository.findByEmail(oAuth2UserInfo.email())
                 .orElseGet(oAuth2UserInfo::toEntity);
-        return userRepository.save(user);
+        return userRepository.save(member);
     }
 }

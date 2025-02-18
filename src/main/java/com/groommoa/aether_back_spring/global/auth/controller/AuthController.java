@@ -1,5 +1,6 @@
 package com.groommoa.aether_back_spring.global.auth.controller;
 
+import com.groommoa.aether_back_spring.global.auth.model.PrincipalDetails;
 import com.groommoa.aether_back_spring.global.auth.service.TokenService;
 import com.groommoa.aether_back_spring.global.common.constants.HttpStatus;
 import com.groommoa.aether_back_spring.global.common.constants.TokenKey;
@@ -48,12 +49,17 @@ public class AuthController {
      */
     @DeleteMapping("/logout")
     public ResponseEntity<CommonResponse> logout(@AuthenticationPrincipal UserDetails userDetails) {
+
         // 사용자 계정과 연관된 refresh token 삭제
-        tokenService.deleteRefreshToken(userDetails.getUsername());
+        String userId = userDetails.getUsername();
+        tokenService.deleteRefreshToken(userId);
 
         // 로그아웃 성공 응답 객체 생성
+        Map<String, Object> result = new HashMap<>();
+        result.put("requestedId", userId);
+
         CommonResponse response = new CommonResponse(
-                HttpStatus.OK, "로그아웃에 성공했습니다.", null);
+                HttpStatus.OK, "로그아웃에 성공했습니다.", result);
         return ResponseEntity.ok(response);
     }
 

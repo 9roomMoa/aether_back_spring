@@ -65,6 +65,6 @@ public record PrincipalDetails(
 
     @Override
     public String getUsername() {
-        return member.getEmail();
+        return member.getId();
     }
 }
