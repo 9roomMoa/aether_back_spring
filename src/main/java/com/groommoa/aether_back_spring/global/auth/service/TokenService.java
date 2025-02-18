@@ -23,10 +23,10 @@ public class TokenService {
     /**
      * 특정 사용자의 리프레시 토큰을 삭제합니다.
      *
-     * @param userKey 사용자 고유 키
+     * @param id 사용자 고유 id
      */
-    public void deleteRefreshToken(String userKey) {
-        tokenRepository.deleteById(userKey);
+    public void deleteRefreshToken(String id) {
+        tokenRepository.deleteById(id);
     }
 
     /**
