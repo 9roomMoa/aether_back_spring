@@ -77,7 +77,7 @@ public class AuthController {
             newAccessToken = newAccessToken.substring(TokenKey.TOKEN_PREFIX.length());
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new CommonResponse(HttpStatus.UNAUTHORIZED, "access token 재발급에 실패했습니다.", null));
+                    .body(new CommonResponse(HttpStatus.UNAUTHORIZED, "만료되지 않은 access token 입니다.", null));
         }
 
         Map<String, Object> result = new HashMap<>();
