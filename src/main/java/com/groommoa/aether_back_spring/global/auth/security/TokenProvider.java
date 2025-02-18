@@ -18,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -55,36 +56,35 @@ public class TokenProvider {
     /**
      * AccessToken 생성
      *
-     * @param authentication 인증 객체
+     * @param principalDetails 인증된 유저 정보 객체
      * @return 생성된 AccessToken
      */
-    public String generateAccessToken(Authentication authentication) {
-        return generateToken(authentication, ACCESS_TOKEN_EXPIRE_TIME);
+    public String generateAccessToken(PrincipalDetails principalDetails) {
+        return generateToken(principalDetails, ACCESS_TOKEN_EXPIRE_TIME);
     }
 
     /**
      * RefreshToken을 생성하고 Redis에 저장
      *
-     * @param authentication 인증 객체
+     * @param principalDetails 인증된 유저 정보 객체
      * @param accessToken    발급된 AccessToken
      */
-    public void generateRefreshToken(Authentication authentication, String accessToken) {
-        String refreshToken = generateToken(authentication, REFRESH_TOKEN_EXPIRE_TIME);
-        tokenService.saveOrUpdate(authentication.getName(), refreshToken, accessToken);
+    public void generateRefreshToken(PrincipalDetails principalDetails, String accessToken) {
+        String refreshToken = generateToken(principalDetails, REFRESH_TOKEN_EXPIRE_TIME);
+        tokenService.saveOrUpdate(principalDetails.getUsername(), refreshToken, accessToken);
     }
 
     /**
      * JWT 토큰을 생성하는 내부 메서드
      *
-     * @param authentication 인증 객체
+     * @param principalDetails 인증된 유저 정보 객체
      * @param expireTime     토큰 만료 시간
      * @return 생성된 JWT 토큰
      */
-    private String generateToken(Authentication authentication, long expireTime) {
+    private String generateToken(PrincipalDetails principalDetails, long expireTime) {
         Date now = new Date();
         Date expiredDate = new Date(now.getTime() + expireTime);
 
-        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
         Member member = principalDetails.member();
 
         return Jwts.builder()
@@ -148,7 +148,7 @@ public class TokenProvider {
 
             // RefreshToken이 유효한 경우 새로운 AccessToken 발급
             if (validateToken(refreshToken)){
-                String reissueAccessToken = generateAccessToken(getAuthentication(refreshToken));
+                String reissueAccessToken = generateAccessToken((PrincipalDetails) getAuthentication(refreshToken).getPrincipal());
                 tokenService.updateToken(reissueAccessToken, token);
                 return reissueAccessToken;
             }
