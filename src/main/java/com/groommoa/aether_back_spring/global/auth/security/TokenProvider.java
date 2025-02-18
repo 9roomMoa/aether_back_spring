@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -54,13 +52,23 @@ public class TokenProvider {
     }
 
     /**
-     * AccessToken 생성
+     * AccessToken 최초 생성
      *
      * @param principalDetails 인증된 유저 정보 객체
      * @return 생성된 AccessToken
      */
     public String generateAccessToken(PrincipalDetails principalDetails) {
         return generateToken(principalDetails, ACCESS_TOKEN_EXPIRE_TIME);
+    }
+
+    /**
+     * AccessToken 재발급
+     *
+     * @param claims 이전 jwt 토큰 claims
+     * @return 생성된 AccessToken
+     */
+    public String generateAccessToken(Claims claims) {
+        return generateToken(claims.getId(), claims, ACCESS_TOKEN_EXPIRE_TIME);
     }
 
     /**
@@ -98,6 +106,29 @@ public class TokenProvider {
                 .compact();
     }
 
+    /**
+     * JWT 토큰 재생성
+     *
+     * @param id 사용자 고유 id
+     * @param claims 이전 JWT 토큰 claims
+     * @param expireTime 토큰 만료 시간
+     * @return 생성된 JWT 토큰
+     */
+    private String generateToken(String id, Claims claims, long expireTime) {
+        Date now = new Date();
+        Date expiredDate = new Date(now.getTime() + expireTime);
+
+        return Jwts.builder()
+                .header().type("JWT")                   // 헤더에 타입 지정
+                .and()
+                .subject(id)                // 멤버 id
+                .claims(claims)            // claim 정보
+                .issuedAt(now)                          // 발급 시간
+                .expiration(expiredDate)                // 만료 시간
+                .signWith(secretKey, Jwts.SIG.HS512)    // 서명 (HMAC SHA512)
+                .compact();
+    }
+
     private Map<String, Object> memberToMap(Member member){
         Map<String, Object> memberMap = new HashMap<>();
 
@@ -118,10 +149,7 @@ public class TokenProvider {
         Claims claims = parseClaims(token);
         List<SimpleGrantedAuthority> authorities = getAuthorities(claims);
 
-        // Spring Security의 User 객체 생성
-        User principal = new User(claims.getSubject(), "", authorities);
-
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        return new UsernamePasswordAuthenticationToken(claims, token, authorities);
     }
 
     /**
@@ -148,7 +176,8 @@ public class TokenProvider {
 
             // RefreshToken이 유효한 경우 새로운 AccessToken 발급
             if (validateToken(refreshToken)){
-                String reissueAccessToken = generateAccessToken((PrincipalDetails) getAuthentication(refreshToken).getPrincipal());
+                Claims claims = (Claims) getAuthentication(refreshToken).getPrincipal();
+                String reissueAccessToken = generateAccessToken(claims);
                 tokenService.updateToken(reissueAccessToken, token);
                 return reissueAccessToken;
             }
