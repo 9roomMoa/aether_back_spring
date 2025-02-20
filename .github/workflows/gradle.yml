@@ -21,7 +21,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-        # 2. application-oauth/cloud.properties 생성
+        # 2. application-oauth/cloud/secret.properties 생성
       - name: Create application-oauth.properties
         run: |
           echo "spring.security.user.name=${{ secrets.SECURITY_USERNAME }}" > ./src/main/resources/application-oauth.properties
@@ -48,6 +48,10 @@ jobs:
           echo "spring.data.mongodb.username=${{ secrets.MONGODB_USERNAME }}" >> ./src/main/resources/application-cloud.properties
           echo "spring.data.mongodb.password=${{ secrets.MONGODB_PASSWORD }}" >> ./src/main/resources/application-cloud.properties
           echo "spring.data.mongodb.authentication-database=${{ secrets.MONGODB_AUTHENTICATION_DATABASE }}" >> ./src/main/resources/application-cloud.properties
+
+      - name: Create application-secret.properties
+        run: |
+          echo "eureka.client.service-url.defaultZone=${{ secrets.EUREKA_CLIENT_SERVICE_URL }}" > ./src/main/resources/application-secret.properties
 
         # 3. SpringBoot 애플리케이션 빌드
       - name: Build with Gradle
