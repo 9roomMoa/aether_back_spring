@@ -90,11 +90,11 @@ jobs:
           sudo docker stop aether_back_spring 2>/dev/null || true
           sudo docker rm aether_back_spring 2>/dev/null || true
 
-      # 3. 최신 이미지를 컨테이너화하여 실행 (80 포트에서 실행)
+      # 3. 최신 이미지를 컨테이너화하여 실행
       - name: Run New Container (Port 80)
         run: |
           sudo docker run --name aether_back_spring --rm -d \
-          -p 80:8080 \
+          -p 8082:8082 \
           --network host \
           ${{ secrets.DOCKERHUB_USERNAME }}/aether_back_spring
 
