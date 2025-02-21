@@ -34,6 +34,7 @@ jobs:
 
       - name: Create application-cloud properties
         run: |
+          echo "eureka.instance.instance-id=aether-back-auth:${{ secrets.SERVER_PORT }}" >> ./src/main/resources/application-cloud.properties
           echo "spring.datasource.driver-class-name=${{ secrets.DATASOURCE_DRIVER_CLASSNAME }}" > ./src/main/resources/application-cloud.properties
           echo "spring.datasource.url=${{ secrets.DATASOURCE_URL }}" >> ./src/main/resources/application-cloud.properties
           echo "spring.datasource.username=${{ secrets.DATASOURCE_USERNAME }}" >> ./src/main/resources/application-cloud.properties
