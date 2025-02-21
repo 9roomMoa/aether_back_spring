@@ -21,7 +21,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-        # 2. application-oauth/cloud.properties 생성
+        # 2. application-oauth/cloud/secret.properties 생성
       - name: Create application-oauth.properties
         run: |
           echo "spring.security.user.name=${{ secrets.SECURITY_USERNAME }}" > ./src/main/resources/application-oauth.properties
@@ -31,9 +31,11 @@ jobs:
           echo "spring.security.oauth2.client.registration.google.client-secret=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> ./src/main/resources/application-oauth.properties
           echo "spring.security.oauth2.client.registration.google.scope=${{ secrets.GOOGLE_SCOPE }}" >> ./src/main/resources/application-oauth.properties
           echo "spring.security.oauth2.client.registration.google.redirect-uri=${{ secrets.GOOGLE_REDIRECT_URI }}" >> ./src/main/resources/application-oauth.properties
+          echo "login.success.base-url=https://aether.asia" >> ./src/main/resources/application-oauth.properties
 
       - name: Create application-cloud properties
         run: |
+          echo "eureka.instance.instance-id=aether-back-auth:${{ secrets.SERVER_PORT }}" >> ./src/main/resources/application-cloud.properties
           echo "spring.datasource.driver-class-name=${{ secrets.DATASOURCE_DRIVER_CLASSNAME }}" > ./src/main/resources/application-cloud.properties
           echo "spring.datasource.url=${{ secrets.DATASOURCE_URL }}" >> ./src/main/resources/application-cloud.properties
           echo "spring.datasource.username=${{ secrets.DATASOURCE_USERNAME }}" >> ./src/main/resources/application-cloud.properties
@@ -48,6 +50,10 @@ jobs:
           echo "spring.data.mongodb.username=${{ secrets.MONGODB_USERNAME }}" >> ./src/main/resources/application-cloud.properties
           echo "spring.data.mongodb.password=${{ secrets.MONGODB_PASSWORD }}" >> ./src/main/resources/application-cloud.properties
           echo "spring.data.mongodb.authentication-database=${{ secrets.MONGODB_AUTHENTICATION_DATABASE }}" >> ./src/main/resources/application-cloud.properties
+
+      - name: Create application-secret.properties
+        run: |
+          echo "eureka.client.service-url.defaultZone=${{ secrets.EUREKA_CLIENT_SERVICE_URL }}" > ./src/main/resources/application-secret.properties
 
         # 3. SpringBoot 애플리케이션 빌드
       - name: Build with Gradle
@@ -85,11 +91,11 @@ jobs:
           sudo docker stop aether_back_spring 2>/dev/null || true
           sudo docker rm aether_back_spring 2>/dev/null || true
 
-      # 3. 최신 이미지를 컨테이너화하여 실행 (80 포트에서 실행)
+      # 3. 최신 이미지를 컨테이너화하여 실행
       - name: Run New Container (Port 80)
         run: |
           sudo docker run --name aether_back_spring --rm -d \
-          -p 80:8080 \
+          -p 8082:8082 \
           --network host \
           ${{ secrets.DOCKERHUB_USERNAME }}/aether_back_spring
 

@@ -5,8 +5,8 @@ import com.groommoa.aether_back_spring.global.auth.security.TokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -23,7 +23,9 @@ import java.io.IOException;
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final TokenProvider tokenProvider;
-    private static final String URI = "/auth/success";
+
+    @Value("${login.success.base-url}")
+    private String baseUrl;
 
     /**
      * OAuth2 로그인 성공 시 실행되는 메서드
@@ -43,7 +45,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         tokenProvider.generateRefreshToken(principalDetails, accessToken);
 
         // 클라이언트를 인증 성공 페이지로 리다이렉트
-        String redirectUrl = UriComponentsBuilder.fromUriString(URI)
+        String redirectUrl = UriComponentsBuilder.fromUriString(baseUrl)
+                .path("/auth/success")
                 .queryParam("accessToken", accessToken)
                 .build().toUriString();
 
