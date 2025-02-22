@@ -60,3 +60,11 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+processResources.dependsOn('copySecret')
+
+tasks.register('copySecret', Copy) {
+	from './aether-security'
+	include 'application-auth.properties'
+	into 'src/main/resources'
+}
