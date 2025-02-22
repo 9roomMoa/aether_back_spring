@@ -38,6 +38,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
+
+        // baseUrl이 정상적으로 로드되었는지 확인
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            throw new IllegalStateException("Base URL이 properties에서 로드되지 않았습니다.");
+        }
+
         // accessToken, refreshToken 발급
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
