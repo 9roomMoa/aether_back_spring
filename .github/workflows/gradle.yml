@@ -14,6 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
+          token: ${{ secrets.GIT_TOKEN }}
+
       # 1. Java 21 세팅
       - name: Set up JDK 21
         uses: actions/setup-java@v3
@@ -21,58 +25,37 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-        # 2. application-oauth/cloud/secret.properties 생성
-      - name: Create application-oauth.properties
-        run: |
-          echo "spring.security.user.name=${{ secrets.SECURITY_USERNAME }}" > ./src/main/resources/application-oauth.properties
-          echo "spring.security.user.password=${{ secrets.SECURITY_PASSWORD }}" >> ./src/main/resources/application-oauth.properties
-          echo "jwt.key=${{ secrets.JWT_KEY }}" >> ./src/main/resources/application-oauth.properties
-          echo "spring.security.oauth2.client.registration.google.client-id=${{ secrets.GOOGLE_CLIENT_ID }}" >> ./src/main/resources/application-oauth.properties
-          echo "spring.security.oauth2.client.registration.google.client-secret=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> ./src/main/resources/application-oauth.properties
-          echo "spring.security.oauth2.client.registration.google.scope=${{ secrets.GOOGLE_SCOPE }}" >> ./src/main/resources/application-oauth.properties
-          echo "spring.security.oauth2.client.registration.google.redirect-uri=${{ secrets.GOOGLE_REDIRECT_URI }}" >> ./src/main/resources/application-oauth.properties
-          echo "login.success.base-url=https://aether.asia" >> ./src/main/resources/application-oauth.properties
-
-      - name: Create application-cloud properties
-        run: |
-          echo "eureka.instance.instance-id=aether-back-auth:${{ secrets.SERVER_PORT }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.datasource.driver-class-name=${{ secrets.DATASOURCE_DRIVER_CLASSNAME }}" > ./src/main/resources/application-cloud.properties
-          echo "spring.datasource.url=${{ secrets.DATASOURCE_URL }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.datasource.username=${{ secrets.DATASOURCE_USERNAME }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.data.redis.host=${{ secrets.REDIS_HOST }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.data.redis.port=${{ secrets.REDIS_PORT }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.h2.console.enabled=${{ secrets.H2CONSOLE_ENABLED }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.h2.console.path=${{ secrets.H2CONSOLE_PATH }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.data.mongodb.host=${{ secrets.MONGODB_HOST }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.data.mongodb.port=${{ secrets.MONGODB_PORT }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.data.mongodb.database=${{ secrets.MONGODB_DATABASE }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.data.mongodb.username=${{ secrets.MONGODB_USERNAME }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.data.mongodb.password=${{ secrets.MONGODB_PASSWORD }}" >> ./src/main/resources/application-cloud.properties
-          echo "spring.data.mongodb.authentication-database=${{ secrets.MONGODB_AUTHENTICATION_DATABASE }}" >> ./src/main/resources/application-cloud.properties
-
-      - name: Create application-secret.properties
-        run: |
-          echo "eureka.client.service-url.defaultZone=${{ secrets.EUREKA_CLIENT_SERVICE_URL }}" > ./src/main/resources/application-secret.properties
-
-        # 3. SpringBoot 애플리케이션 빌드
-      - name: Build with Gradle
-        uses: gradle/actions/setup-gradle@v3
+      # 2. gradle caching - 빌드 시간 향상
+      - name: Gradle Caching
+        uses: actions/cache@v3
         with:
-          arguments: clean bootJar
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      # 4. Docker 이미지 빌드
+      # 2. SpringBoot 애플리케이션 빌드
+      - name: Build with Gradle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean bootJar
+
+      # 3. Docker 이미지 빌드
       - name: Docker Image Build
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/aether_back_spring .
+        run: |
+          docker build --cache-from=type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/aether_back_spring \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/aether_back_spring .
 
-      # 5. DockerHub 로그인
+      # 4. DockerHub 로그인
       - name: DockerHub Login
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # 6. DockerHub 이미지 push
+      # 5. DockerHub 이미지 push
       - name: DockerHub push
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/aether_back_spring
 
@@ -92,13 +75,12 @@ jobs:
           sudo docker rm aether_back_spring 2>/dev/null || true
 
       # 3. 최신 이미지를 컨테이너화하여 실행
-      - name: Run New Container (Port 80)
+      - name: Run New Container
         run: |
           sudo docker run --name aether_back_spring --rm -d \
-          -p 8082:8082 \
-          --network host \
-          ${{ secrets.DOCKERHUB_USERNAME }}/aether_back_spring
+          -p 8082:8082 -e SPRING_PROFILES_ACTIVE=auth \
+          --network host ${{ secrets.DOCKERHUB_USERNAME }}/aether_back_spring
 
       # 4. 미사용 이미지 정리
       - name: Delete old Docker Image
-        run: sudo docker system prune -f
+        run: sudo docker image prune -f

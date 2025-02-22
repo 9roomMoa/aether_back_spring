@@ -1,0 +1,3 @@
+[submodule "aether-security"]
+	path = aether-security
+	url = https://github.com/9roomMoa/aether-security.git
