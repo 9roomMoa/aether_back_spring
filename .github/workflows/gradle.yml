@@ -78,9 +78,8 @@ jobs:
       - name: Run New Container
         run: |
           sudo docker run --name aether_back_spring --rm -d \
-          -p 8082:8082 \
-          --network host \
-          ${{ secrets.DOCKERHUB_USERNAME }}/aether_back_spring
+          -p 8082:8082 -e SPRING_PROFILES_ACTIVE=auth \
+          --network host ${{ secrets.DOCKERHUB_USERNAME }}/aether_back_spring
 
       # 4. 미사용 이미지 정리
       - name: Delete old Docker Image
