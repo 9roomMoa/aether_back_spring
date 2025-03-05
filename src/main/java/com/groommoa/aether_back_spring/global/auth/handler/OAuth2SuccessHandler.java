@@ -1,9 +1,11 @@
 package com.groommoa.aether_back_spring.global.auth.handler;
 
+import com.groommoa.aether_back_spring.domain.user.entity.Member;
 import com.groommoa.aether_back_spring.global.auth.model.PrincipalDetails;
 import com.groommoa.aether_back_spring.global.auth.security.TokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -50,10 +52,16 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = tokenProvider.generateAccessToken(principalDetails);
         tokenProvider.generateRefreshToken(principalDetails, accessToken);
 
+        // 사용자 정보 추출
+        Member member = principalDetails.member();
+
+        HttpSession session = request.getSession();
+        session.setAttribute("accessToken", accessToken);
+        session.setAttribute("member", member);
+
         // 클라이언트를 인증 성공 페이지로 리다이렉트
         String redirectUrl = UriComponentsBuilder.fromUriString(baseUrl)
                 .path("/auth/success")
-                .queryParam("accessToken", accessToken)
                 .build().toUriString();
 
         response.sendRedirect(redirectUrl);
