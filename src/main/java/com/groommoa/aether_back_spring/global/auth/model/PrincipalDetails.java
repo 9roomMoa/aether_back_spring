@@ -1,6 +1,7 @@
 package com.groommoa.aether_back_spring.global.auth.model;
 
 import com.groommoa.aether_back_spring.domain.user.entity.Member;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -63,6 +64,11 @@ public record PrincipalDetails(
         return null;
     }
 
+    /**
+     * DB에 저장된 유저 id 반환
+     *
+     * @return 유저 id
+     */
     @Override
     public String getUsername() {
         return member.getId();
