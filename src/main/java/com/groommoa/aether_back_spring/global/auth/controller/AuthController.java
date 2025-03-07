@@ -1,11 +1,13 @@
 package com.groommoa.aether_back_spring.global.auth.controller;
 
+import com.groommoa.aether_back_spring.domain.user.entity.Member;
 import com.groommoa.aether_back_spring.global.auth.service.TokenService;
 import com.groommoa.aether_back_spring.global.common.constants.HttpStatus;
 import com.groommoa.aether_back_spring.global.common.constants.TokenKey;
 import com.groommoa.aether_back_spring.global.common.response.CommonResponse;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,15 +28,22 @@ public class AuthController {
 
     /**
      * 소셜 로그인 성공시 호출됨 (redirect)
-     * @param accessToken 서버에서 발급된 JWT access token
+     * @param session 서버에서 생성된 데이터 전달용 사용자 세션
      * @return 로그인 성공 응답과 JWT access token
      */
     @GetMapping("/success")
-    public ResponseEntity<CommonResponse> loginSuccess(@RequestParam String accessToken) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("accessToken", accessToken);
+    public ResponseEntity<CommonResponse> loginSuccess(HttpSession session) {
+        // 세션에서 데이터 읽기
+        String accessToken = (String) session.getAttribute("accessToken");
+        Member member = (Member) session.getAttribute("member");
 
         // 소셜 로그인 성공 응답 객체 생성
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", member.getId());
+        result.put("username", member.getName());
+        result.put("email", member.getEmail());
+        result.put("accessToken", accessToken);
+
         CommonResponse response = new CommonResponse(
                 HttpStatus.OK, "소셜 로그인에 성공했습니다.", result);
         return ResponseEntity.ok(response);
