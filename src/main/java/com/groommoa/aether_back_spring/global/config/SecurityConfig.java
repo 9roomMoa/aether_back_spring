@@ -20,6 +20,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.Collections;
 
 /**
  * Spring Security의 보안 설정을 담당하는 Spring Configuration
@@ -51,6 +55,22 @@ public class SecurityConfig {
     }
 
     /**
+     * CORS 설정을 위한 CorsConfigurationSource를 정의
+     * <P></P>
+     * CORS 요청에 대해 허용할 설정 지정
+     */
+    CorsConfigurationSource corsConfigurationSource() {
+        return request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedHeaders(Collections.singletonList("*"));
+            config.setAllowedMethods(Collections.singletonList("*"));
+            config.setAllowedOriginPatterns(Collections.singletonList("http://localhost:5173"));
+            config.setAllowCredentials(true);
+            return config;
+        };
+    }
+
+    /**
      * Spring Security의 보안 설정을 정의하는 SecurityFilterChain 생성
      * @param http HttpSecurity 객체
      * @return SecurityFilterChain 객체
@@ -61,6 +81,9 @@ public class SecurityConfig {
         http
                 // CSRF 보호 비활성화 (JWT 사용 시 필요)
                 .csrf(AbstractHttpConfigurer::disable)
+
+                // CORS 설정 적용
+                .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
 
                 // HTTP 기본 인증 비활성화 (JWT 사용)
                 .httpBasic(AbstractHttpConfigurer::disable)
