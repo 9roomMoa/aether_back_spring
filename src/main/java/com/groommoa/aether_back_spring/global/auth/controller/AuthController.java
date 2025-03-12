@@ -13,7 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,21 +36,22 @@ public class AuthController {
      * @return 로그인 성공 응답과 JWT access token
      */
     @GetMapping("/success")
-    public ResponseEntity<CommonResponse> loginSuccess(HttpSession session) {
+    public void loginSuccess(HttpSession session, HttpServletResponse response) throws IOException {
         // 세션에서 데이터 읽기
         String accessToken = (String) session.getAttribute("accessToken");
         Member member = (Member) session.getAttribute("member");
 
-        // 소셜 로그인 성공 응답 객체 생성
-        Map<String, Object> result = new HashMap<>();
-        result.put("id", member.getId());
-        result.put("username", member.getName());
-        result.put("email", member.getEmail());
-        result.put("accessToken", accessToken);
+        // 프론트엔드 엔드포인트로 리다이렉트
+        String baseUrl = "http://localhost:5173";
+        String redirectUrl = UriComponentsBuilder.fromUriString(baseUrl)
+                .path("sign-up")
+                .queryParam("id", member.getId())
+                .queryParam("accessToken", accessToken)
+                .queryParam("username", URLEncoder.encode(member.getName(), StandardCharsets.UTF_8))
+                .queryParam("email", member.getEmail())
+                .toUriString();
 
-        CommonResponse response = new CommonResponse(
-                HttpStatus.OK, "소셜 로그인에 성공했습니다.", result);
-        return ResponseEntity.ok(response);
+        response.sendRedirect(redirectUrl);
     }
 
     /**
