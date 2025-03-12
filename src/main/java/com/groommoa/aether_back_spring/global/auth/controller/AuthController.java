@@ -47,7 +47,7 @@ public class AuthController {
                 .path("sign-up")
                 .queryParam("id", member.getId())
                 .queryParam("accessToken", accessToken)
-                .queryParam("username", URLEncoder.encode(member.getName(), StandardCharsets.UTF_8))
+                .queryParam("username", member.getName())
                 .queryParam("email", member.getEmail())
                 .toUriString();
 
