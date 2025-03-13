@@ -64,10 +64,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         // 클라이언트를 인증 성공 페이지로 리다이렉트
         String redirectUrl = UriComponentsBuilder.fromUriString(baseUrl)
                 .path("/auth/success")
-                .queryParam("id", member.getId())
-                .queryParam("accessToken", accessToken)
-                .queryParam("username", URLEncoder.encode(member.getName(), StandardCharsets.UTF_8))
-                .queryParam("email", member.getEmail())
                 .build().toUriString();
 
         response.sendRedirect(redirectUrl);
