@@ -53,10 +53,10 @@ public class AuthController {
         headers.setLocation(URI.create(baseFrontendUrl + "/sign-up"));
 
         // 쿠키로 사용자 데이터 전달
-        headers.add(HttpHeaders.SET_COOKIE, "accessToken=" + accessToken + "; Secure; SameSite=None; Path=/; Domain=.localhost; Max-Age=3600");
-        headers.add(HttpHeaders.SET_COOKIE, "id=" + member.getId() + "; Secure; SameSite=None; Path=/; Domain=.localhost; Max-Age=3600");
-        headers.add(HttpHeaders.SET_COOKIE, "username=" + encodedUsername + "; Secure; SameSite=None; Path=/; Domain=.localhost; Max-Age=3600");
-        headers.add(HttpHeaders.SET_COOKIE, "email=" + member.getEmail() + "; Secure; SameSite=None; Path=/; Domain=.localhost; Max-Age=3600");
+        headers.add(HttpHeaders.SET_COOKIE, "accessToken=" + accessToken + "; Secure; SameSite=None; Path=/; Max-Age=3600");
+        headers.add(HttpHeaders.SET_COOKIE, "id=" + member.getId() + "; Secure; SameSite=None; Path=/; Max-Age=3600");
+        headers.add(HttpHeaders.SET_COOKIE, "username=" + encodedUsername + "; Secure; SameSite=None; Path=/; Max-Age=3600");
+        headers.add(HttpHeaders.SET_COOKIE, "email=" + member.getEmail() + "; Secure; SameSite=None; Path=/; Max-Age=3600");
 
         return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
                 .headers(headers)
