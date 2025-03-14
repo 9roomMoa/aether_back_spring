@@ -46,7 +46,7 @@ public class AuthController {
         Member member = (Member) session.getAttribute("member");
 
         // 프론트엔드 엔드포인트로 리다이렉트
-        String baseFrontendUrl = "http://localhost:5173";
+        String baseFrontendUrl = "https://localhost:5173";
         String encodedUsername = Base64.getEncoder().encodeToString(member.getName().getBytes(StandardCharsets.UTF_8));
 
         HttpHeaders headers = new HttpHeaders();
