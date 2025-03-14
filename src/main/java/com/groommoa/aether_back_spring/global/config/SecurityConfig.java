@@ -24,6 +24,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Spring Security의 보안 설정을 담당하는 Spring Configuration
@@ -64,7 +65,10 @@ public class SecurityConfig {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedHeaders(Collections.singletonList("*"));
             config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedOriginPatterns(Collections.singletonList("http://localhost:5173"));
+            config.setAllowedOriginPatterns(List.of(
+                    "http://localhost:5173",
+                    "https://localhost:5173"
+            ));
             config.setAllowCredentials(true);
             return config;
         };
