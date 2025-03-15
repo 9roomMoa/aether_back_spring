@@ -9,11 +9,19 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,21 +40,27 @@ public class AuthController {
      * @return 로그인 성공 응답과 JWT access token
      */
     @GetMapping("/success")
-    public ResponseEntity<CommonResponse> loginSuccess(HttpSession session) {
+    public ResponseEntity<Void> loginSuccess(HttpSession session) throws IOException {
         // 세션에서 데이터 읽기
         String accessToken = (String) session.getAttribute("accessToken");
         Member member = (Member) session.getAttribute("member");
 
-        // 소셜 로그인 성공 응답 객체 생성
-        Map<String, Object> result = new HashMap<>();
-        result.put("id", member.getId());
-        result.put("username", member.getName());
-        result.put("email", member.getEmail());
-        result.put("accessToken", accessToken);
+        // 프론트엔드 엔드포인트로 리다이렉트
+        String baseFrontendUrl = "https://localhost:5173";
+        String encodedUsername = Base64.getEncoder().encodeToString(member.getName().getBytes(StandardCharsets.UTF_8));
 
-        CommonResponse response = new CommonResponse(
-                HttpStatus.OK, "소셜 로그인에 성공했습니다.", result);
-        return ResponseEntity.ok(response);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(baseFrontendUrl + "/sign-up"));
+
+        // 쿠키로 사용자 데이터 전달
+        headers.add(HttpHeaders.SET_COOKIE, "accessToken=" + accessToken + "; Secure; SameSite=None; Path=/; Max-Age=3600");
+        headers.add(HttpHeaders.SET_COOKIE, "id=" + member.getId() + "; Secure; SameSite=None; Path=/; Max-Age=3600");
+        headers.add(HttpHeaders.SET_COOKIE, "username=" + encodedUsername + "; Secure; SameSite=None; Path=/; Max-Age=3600");
+        headers.add(HttpHeaders.SET_COOKIE, "email=" + member.getEmail() + "; Secure; SameSite=None; Path=/; Max-Age=3600");
+
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+                .headers(headers)
+                .body(null);
     }
 
     /**
