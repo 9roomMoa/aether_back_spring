@@ -50,7 +50,14 @@ public class AuthController {
         String encodedUsername = Base64.getEncoder().encodeToString(member.getName().getBytes(StandardCharsets.UTF_8));
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create(baseFrontendUrl + "/sign-up"));
+        String redirectUrl = UriComponentsBuilder.fromUriString(baseFrontendUrl)
+                .path("sign-up")
+                .queryParam("id", member.getId())
+                .queryParam("accessToken", accessToken)
+                .queryParam("username", member.getName())
+                .queryParam("email", member.getEmail())
+                .toUriString();
+        headers.setLocation(URI.create(redirectUrl));
 
         // 쿠키로 사용자 데이터 전달
         headers.add(HttpHeaders.SET_COOKIE, "accessToken=" + accessToken + "; Secure; SameSite=None; Path=/; Max-Age=3600");
