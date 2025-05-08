@@ -1,13 +1,18 @@
 package com.groommoa.aether_back_spring.global.auth.controller;
 
 import com.groommoa.aether_back_spring.domain.user.entity.Member;
+import com.groommoa.aether_back_spring.global.auth.dto.UpdateUserProfileRequestDto;
+import com.groommoa.aether_back_spring.global.auth.dto.UpdateUserProfileResponseDto;
+import com.groommoa.aether_back_spring.global.auth.service.AuthService;
 import com.groommoa.aether_back_spring.global.auth.service.TokenService;
 import com.groommoa.aether_back_spring.global.common.constants.HttpStatus;
 import com.groommoa.aether_back_spring.global.common.constants.TokenKey;
 import com.groommoa.aether_back_spring.global.common.response.CommonResponse;
+import com.groommoa.aether_back_spring.global.common.utils.DtoUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +38,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 public class AuthController {
 
     private final TokenService tokenService;
+    private final AuthService authService;
 
     /**
      * 소셜 로그인 성공시 호출됨 (redirect)
@@ -114,6 +120,18 @@ public class AuthController {
         return ResponseEntity.ok(new CommonResponse(
                 HttpStatus.OK, "access token 재발급에 성공했습니다.", result));
     }
+
+    @PatchMapping("/profile")
+    public ResponseEntity<CommonResponse> updateUserProfile(@RequestBody @Valid UpdateUserProfileRequestDto request,
+                                                            @AuthenticationPrincipal Claims claims){
+        Member updatedMember = authService.updateUserProfile(claims.getSubject(), request);
+        UpdateUserProfileResponseDto responseDto = new UpdateUserProfileResponseDto(updatedMember);
+
+        CommonResponse response = new CommonResponse(
+                HttpStatus.OK, "유저 프로필 정보 수정에 성공했습니다.", DtoUtils.toMap(responseDto));
+        return ResponseEntity.ok(response);
+    }
+
 
     /**
      * 테스트용 엔드포인트
