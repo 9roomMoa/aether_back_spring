@@ -67,7 +67,7 @@ public class SecurityConfig {
             config.setAllowedMethods(Collections.singletonList("*"));
             config.setAllowedOriginPatterns(List.of(
                     "http://localhost:5173",
-                    "https://localhost:5173"
+                    "https://aether9.netlify.app"
             ));
             config.setAllowCredentials(true);
             return config;

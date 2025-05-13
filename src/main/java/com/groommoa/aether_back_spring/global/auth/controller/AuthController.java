@@ -37,6 +37,9 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @RestController
 public class AuthController {
 
+    @Value("${front-end.base-url}")
+    private String frontendBaseUrl;
+
     private final TokenService tokenService;
     private final AuthService authService;
 
@@ -52,11 +55,10 @@ public class AuthController {
         Member member = (Member) session.getAttribute("member");
 
         // 프론트엔드 엔드포인트로 리다이렉트
-        String baseFrontendUrl = "https://aether9.netlify.app";
         String encodedUsername = Base64.getEncoder().encodeToString(member.getName().getBytes(StandardCharsets.UTF_8));
 
         HttpHeaders headers = new HttpHeaders();
-        String redirectUrl = UriComponentsBuilder.fromUriString(baseFrontendUrl)
+        String redirectUrl = UriComponentsBuilder.fromUriString(frontendBaseUrl)
                 .path("sign-up")
                 .queryParam("id", member.getId())
                 .queryParam("accessToken", accessToken)
