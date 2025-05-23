@@ -3,7 +3,9 @@ package com.groommoa.aether_back_spring.global.common.handler;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.groommoa.aether_back_spring.domain.user.exception.UserException;
 import com.groommoa.aether_back_spring.global.common.constants.HttpStatus;
+import com.groommoa.aether_back_spring.global.common.exception.ErrorCode;
 import com.groommoa.aether_back_spring.global.common.response.ErrorResponse;
 import com.mongodb.MongoException;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -99,6 +101,14 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST, "유효하지 않은 입력값입니다.", details
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<ErrorResponse> handleUserException(UserException ex) {
+        ErrorCode errorCode = ex.getErrorCode();
+        ErrorResponse response = new ErrorResponse(
+                errorCode.getHttpStatus().value(), errorCode.getMessage(), null);
+        return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(response);
     }
 
 
