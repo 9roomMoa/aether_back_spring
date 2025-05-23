@@ -14,6 +14,11 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    public Member getUserProfile(String userId){
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+    }
+
     public Member updateUserProfile(String userId, UpdateUserProfileRequestDto request){
         Member member = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));

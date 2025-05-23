@@ -3,6 +3,7 @@ package com.groommoa.aether_back_spring.global.auth.controller;
 import com.groommoa.aether_back_spring.domain.user.entity.Member;
 import com.groommoa.aether_back_spring.global.auth.dto.UpdateUserProfileRequestDto;
 import com.groommoa.aether_back_spring.global.auth.dto.UpdateUserProfileResponseDto;
+import com.groommoa.aether_back_spring.global.auth.dto.UserProfileResponseDto;
 import com.groommoa.aether_back_spring.global.auth.service.AuthService;
 import com.groommoa.aether_back_spring.global.auth.service.TokenService;
 import com.groommoa.aether_back_spring.global.common.constants.HttpStatus;
@@ -121,6 +122,20 @@ public class AuthController {
 
         return ResponseEntity.ok(new CommonResponse(
                 HttpStatus.OK, "access token 재발급에 성공했습니다.", result));
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<CommonResponse> getUserProfile(
+            @AuthenticationPrincipal Claims claims
+    ) {
+        String userId = claims.getSubject();
+        Member member = authService.getUserProfile(userId);
+        UserProfileResponseDto responseDto = UserProfileResponseDto.from(member);
+
+        CommonResponse response = new CommonResponse(
+                HttpStatus.OK, "현재 로그인된 유저 프로필 조회에 성공했습니다.", DtoUtils.toMap(responseDto));
+
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/profile")

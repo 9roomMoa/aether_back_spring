@@ -12,6 +12,10 @@ public class AuthService {
 
     private final UserService userService;
 
+    public Member getUserProfile(String userId){
+        return userService.getUserProfile(userId);
+    }
+
     public Member updateUserProfile(String userId, UpdateUserProfileRequestDto request){
         return userService.updateUserProfile(userId, request);
     }
