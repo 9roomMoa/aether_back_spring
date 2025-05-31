@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
+@Slf4j
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @RestController
@@ -53,13 +55,26 @@ public class AuthController {
     public ResponseEntity<Void> loginSuccess(HttpSession session) throws IOException {
         // 세션에서 데이터 읽기
         String accessToken = (String) session.getAttribute("accessToken");
+        String state = (String) session.getAttribute("state");
         Member member = (Member) session.getAttribute("member");
+
+        String baseUrl = frontendBaseUrl;
+        if (state != null) {
+            try {
+                String decoded = new String(Base64.getDecoder().decode(state), StandardCharsets.UTF_8);
+                if (decoded.startsWith("http")){
+                    baseUrl = decoded;
+                }
+            } catch (IllegalArgumentException e) {
+                log.warn("state 디코딩 실패, 기본 front-end base url 사용");
+            }
+        }
 
         // 프론트엔드 엔드포인트로 리다이렉트
         String encodedUsername = Base64.getEncoder().encodeToString(member.getName().getBytes(StandardCharsets.UTF_8));
 
         HttpHeaders headers = new HttpHeaders();
-        String redirectUrl = UriComponentsBuilder.fromUriString(frontendBaseUrl)
+        String redirectUrl = UriComponentsBuilder.fromUriString(baseUrl)
                 .path("sign-up")
                 .queryParam("id", member.getId())
                 .queryParam("accessToken", accessToken)

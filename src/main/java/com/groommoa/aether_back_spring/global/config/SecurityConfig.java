@@ -3,6 +3,7 @@ package com.groommoa.aether_back_spring.global.config;
 import com.groommoa.aether_back_spring.global.auth.handler.CustomAccessDeniedHandler;
 import com.groommoa.aether_back_spring.global.auth.handler.CustomAuthenticationEntryPoint;
 import com.groommoa.aether_back_spring.global.auth.handler.OAuth2SuccessHandler;
+import com.groommoa.aether_back_spring.global.auth.security.CustomAuthorizationRequestResolver;
 import com.groommoa.aether_back_spring.global.auth.security.TokenAuthenticationFilter;
 import com.groommoa.aether_back_spring.global.auth.security.TokenExceptionFilter;
 import com.groommoa.aether_back_spring.global.auth.service.CustomOauth2UserService;
@@ -17,6 +18,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -44,6 +46,7 @@ public class SecurityConfig {
     private final CustomOauth2UserService customOauth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
     /**
      * 특정 요청을 Security 필터링에서 제외
@@ -122,6 +125,10 @@ public class SecurityConfig {
 
                 // OAuth2 로그인 설정
                 .oauth2Login(auth -> auth
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestResolver(
+                                        new CustomAuthorizationRequestResolver(clientRegistrationRepository)
+                                ))
                         .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
 
                                 // OAuth2 사용자 정보 서비스 설정
