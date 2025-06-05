@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -16,12 +17,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 /**
  * OAuth2 인증 성공 후 실행되는 핸들러
  * <P></P>
  * 인증된 사용자에게 AccessToken과 RefreshToken을 발급하고, 지정된 URI로 리다이렉트
  */
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
@@ -57,9 +60,13 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         // 사용자 정보 추출
         Member member = principalDetails.member();
 
+        // 프론트엔드 Base Url 추출
+        String state = request.getParameter("state");
+
         HttpSession session = request.getSession();
         session.setAttribute("accessToken", accessToken);
         session.setAttribute("member", member);
+        session.setAttribute("state", state);
 
         // 클라이언트를 인증 성공 페이지로 리다이렉트
         String redirectUrl = UriComponentsBuilder.fromUriString(baseUrl)
